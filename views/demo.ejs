@@ -1,0 +1,551 @@
+<html>
+    <head>
+        <title>
+            GeoHash 
+        </title>
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <link
+            href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css" rel="stylesheet">
+        <style>
+            #map-page {
+                height : 100%;
+                padding: 0;
+                width  : 100%;
+            }
+            #map-canvas {
+                height : 70%;
+                padding: 0;
+                width  : 100%;
+            }
+            #pano {
+                height : 30%;
+                padding: 0;
+                width  : 100%;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
+        <script src="http://maps.google.com/maps/api/js?sensor=false&libraries=geometry"></script>
+        <script type="text/javascript">
+            var loadMap = function () {
+                //alert("hello");
+                var loc = <%- JSON.stringify(loc) %>
+                var myOptions = {
+                    center   : new google.maps.LatLng(<%=lat%>, <%=lon%>),
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    zoom     : <%=zoom%>
+                };
+                var map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
+
+                var infowindow = new google.maps.InfoWindow();
+
+                var marker,
+                    i;
+                var markers = [];
+                var picked = [];
+                var ArrayObject = [];
+                var counter;
+
+                // check local storage for any previous itemss
+                if (localStorage.getItem("locations") !== null) {
+                    alert("welcome back  the game");
+                    //get the values from previous session
+                    document.getElementById("score_cell").innerHTML = localStorage.getItem("demo_score");
+                    ArrayObject                                                                           = JSON.parse(localStorage.getItem("demo_locations"));
+
+                    var myArrayObject = JSON.parse(localStorage.getItem("demo_locations"));
+                    console.log(myArrayObject.length);
+
+                    //for debugging
+                    for (var i = 0; i < myArrayObject.length; i++) {
+                        var personObject = myArrayObject[i].name;
+                        alert(personObject);
+                    }
+
+                    for (i = 0; i < loc.length; i++) {
+                        counter = 0;
+                        for (var j = 0; j < myArrayObject.length; j++) {
+                            var personObject = myArrayObject[j].name;
+
+                            if (loc[i][0] == personObject) {
+                                counter++;
+                            }
+                            //console.log( personObject.value);
+
+                        }
+                        if (counter !== 1) {
+
+                            var pos = new google.maps.LatLng(loc[i][1], loc[i][2]);
+                            marker     = new google.maps.Marker({
+                                icon    : '/images/Treasure-icon.png',
+                                map     : map,
+                                position: pos
+                            });
+
+                            markers[i] = marker;
+
+                            google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                                return function () {
+                                    infowindow.setContent(loc[i][0]);
+                                    infowindow.open(map, marker);
+                                }
+                            })(marker, i)); //end if statement for checking localstogare
+                        }
+
+                    }
+
+                } else { //if there is nothing on localstorage
+
+                    alert("you are new in the game");
+                    ///ad markers on the map
+                    for (i = 0; i < loc.length; i++) {
+
+                        marker     = new google.maps.Marker({
+                            icon    : '/images/Treasure-icon.png',
+                            map     : map,
+                            position: new google.maps.LatLng(loc[i][1], loc[i][2])
+                        });
+                        markers[i] = marker;
+
+                        google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                            return function () {
+                                infowindow.setContent(loc[i][0]);
+                                infowindow.open(map, marker);
+                            }
+                        })(marker, i));
+                    }
+
+                }
+
+                // I add a marker to the map using the given latitude
+                // and longitude location.
+                function addMarker(latitude, longitude, label) {
+                    // Create the marker - this will automatically place it
+                    // on the existing Google map (that we pass-in).
+                    var marker = new google.maps.Marker({
+                        map     : map,
+                        position: new google.maps.LatLng(latitude, longitude),
+                        title   : (label || "")
+                    });
+                    // Return the new marker reference.
+                    return (marker);
+                }
+
+                // I update the marker's position and label.
+                function updateMarker(marker, latitude, longitude, label) {
+                    // Update the position.
+                    marker.setPosition(new google.maps.LatLng(latitude, longitude));
+                    // Update the title if it was provided.
+                    if (label) {
+                        marker.setTitle(label);
+                    }
+                }
+
+                var positionCell = document.getElementById('position_cell');
+                ///positionCell.firstChild.nodeValue = panorama.getPosition() + '';
+
+                // Check to see if this browser supports geolocation.
+                if (navigator.geolocation) {
+
+                    // This is the location marker that we will be using
+                    // on the map. Let's store a reference to it here so
+                    // that it can be updated in several places.
+                    var locationMarker = null;
+
+                    // Get the location of the user's browser using the
+                    // native geolocation service. When we invoke this method
+                    // only the first callback is requied. The second
+                    // callback - the error handler - and the third
+                    // argument - our configuration options - are optional.
+                    navigator.geolocation.getCurrentPosition(function (position) {
+
+                        alert("GPS Signal available ");
+                        // Check to see if there is already a location.
+                        // There is a bug in FireFox where this gets
+                        // invoked more than once with a cahced result.
+                        if (locationMarker) {
+                            return;
+                        }
+                        var p = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        //update map center
+                        map.setCenter(p);
+
+                        $("#myPopupDiv1").popup("open");
+                        // Log that this is the initial position.
+                        console.log("Initial Position Found");
+                        //$( "#myPopupDiv" ).popup( "open" );
+
+                        // Add a marker to the map using the position.
+                        locationMarker                    = addMarker(position.coords.latitude, position.coords.longitude, "Initial Position");
+                        //console.log(position.coords)
+                        positionCell.firstChild.nodeValue = position.coords.latitude + '*****' + position.coords.longitude;
+
+                        ///console.log(panorama.getPosition().lat());
+
+                    }, function (error) {
+                        //alert("heyyyy make gps on");
+
+                        alert("GPS Signal not available ");
+                        //alert(" lost gps connection");
+                    }, {
+                        enableHighAccuracy: true,
+                        maximumAge        : (1000 * 60 * 15),
+                        timeout           : (5 * 1000)
+                    });
+
+                    // Now tha twe have asked for the position of the user,
+                    // let's watch the position to see if it updates. This
+                    // can happen if the user physically moves, of if more
+                    // accurate location information has been found (ex.
+                    // GPS vs. IP address).
+                    //
+                    // NOTE: This acts much like the native setInterval(),
+                    // invoking the given callback a number of times to
+                    // monitor the position. As such, it returns a "timer ID"
+                    // that can be used to later stop the monitoring.
+
+                    var score = JSON.parse(localStorage.getItem("demo_score"));
+                    //total score of the user
+                    //alert(score);
+                    //total score of the user
+                    var k = 0;
+                    var positionTimer = navigator.geolocation.watchPosition(function (position) {
+
+                        // Log that a newer, perhaps more accurate
+                        // position has been found.
+
+                        console.log("Newer Position Found");
+                        alert("GPS working")
+                        var counterCell = document.getElementById('counter');
+                        counterCell.innerHTML = Math.round(position.coords.accuracy, 1) + "m";
+                        console.log(Math.round(position.coords.accuracy, 1));
+                        console.log(Math.round(position.coords.altitudeAccuracy));
+                        var altitudeCell = document.getElementById('altitude');
+                        altitudeCell.innerHTML = Math.round(position.coords.altitudeAccuracy) + "m";
+
+                        $("#myPopupDiv").popup("close");
+                        $("#myPopupDiv1").popup("close");
+                        //popup window alert and close it 1 second
+                        $("#myPopupDiv2").popup("open")
+                        setTimeout(function () {
+                            $('#myPopupDiv2').popup("close");
+                        }, 2000);
+
+                        // Set the new position of the existing marker.
+                        updateMarker(locationMarker, position.coords.latitude, position.coords.longitude, "Updated / Accurate Position");
+
+                        positionCell.firstChild.nodeValue = position.coords.latitude + '*****' + position.coords.longitude;
+                        var p2,
+                            p1;
+                        p1 = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        //update map center
+                        map.setCenter(p1);
+
+                        //alert(p1);
+                        for (var i = 0; i < markers.length; i++) {
+
+                            //check if it is already picked or not
+                            if (markers[i] != null) {
+                                p2 = new google.maps.LatLng(loc[i][1], loc[i][2]);
+                                //alert(p2);
+                                //alert(markers.length):
+                                //alert(monsters[i][0]);
+                                //alert(calcDistance(p1, p2));
+                                if (calcDistance(p1, p2) < 0.020) {
+
+                                    //store picked balls
+                                    picked[k] = loc[i][0];
+                                    console.log("same place");
+                                    //remove marker from the map
+                                    markers[i].setMap(null);
+                                    //set marker i to null
+
+                                    markers[i] = null;
+                                    console.log(markers[i]);
+                                    score = score + 1;
+                                    //break the rules and keep go
+
+                                    localStorage.setItem("demo_score", score);
+                                    var scoreCell = document.getElementById('score_cell');
+                                    scoreCell.innerHTML = score;
+                                    var collectedCell = document.getElementById('ball_cell');
+                                    collectedCell.innerHTML = loc[i][0];
+                                    k++;
+
+                                    var name = loc[i][0];
+                                    var lat = loc[i][1];
+                                    var lon = loc[i][2];
+
+                                    //send data to nodejs server to store
+                                    //send data to nodejs server to store
+                                    $.ajax({
+                                        data   : {
+                                            lat : lat,
+                                            lon : lon,
+                                            name: name
+                                        },
+                                        error  : function (data, textStatus, jqXHR) {
+                                            createAndSaveLocStorage(name, lat, lon, false);
+                                            alert("Data could not be added!");
+                                        },
+                                        method : 'post',
+                                        success: function (data, textStatus, jqXHR) {
+                                            alert("Data Added!!!");
+
+                                            createAndSaveLocStorage(name, lat, lon, true);
+                                            updateServer();
+
+                                        },
+                                        url    : "http://ct100020vir6.pc.lut.fi:1072/profile"
+                                    });
+                                    //if the player collects the all points on map show statistics
+                                    //and delete all local storage data
+                                    if (score == loc.length) {
+                                        $('#myModalNorm').modal('show');
+                                        //put score on local storage
+                                    }
+
+                                } else {
+                                    console.log("different palcess");
+
+                                }
+                            }
+
+                        }; //end of for 
+
+                    }, function (error) {
+
+                        //$( "#myPopupDiv2" ).popup( "close" );
+                        // $( "#myPopupDiv1" ).popup( "close" );
+                        //$("#myPopupDiv").popup("open");
+
+                        alert("GPSSSSS Problemmmmm:");
+
+                        //alert(" lost gps connection");
+                    }, {
+                        enableHighAccuracy: true,
+                        maximumAge        : 1000 * 6,
+                        timeout           : 4 * 1000
+                    } // end of if statement
+                    );
+
+                } else {
+                    alert("GPS is not supported!!");
+                }
+
+                //calculate distance b/w two points
+                function calcDistance(p1, p2) {
+                    return (google.maps.geometry.spherical.computeDistanceBetween(p1, p2) / 1000).toFixed(3);
+                }
+
+                //create local storage for locations
+                function createAndSaveLocStorage(name, latitude, longitude, p) {
+
+                    var data = {
+                        collected : 1,
+                        lan       : latitude,
+                        lon       : longitude,
+                        name      : name,
+                        sendserver: p
+                    };
+                    ArrayObject.push(data);
+                    localStorage.setItem("demo_locations", JSON.stringify(ArrayObject));
+                }
+
+                //update the server
+                function updateServer() {
+                    // var dataarray=localStorage.getItem("locations");
+                    //var jsondata=JSON.parse(dataarray);
+                    //console.log(jsondata);
+                    //update the array
+                    for (var i = 0; i < ArrayObject.length; i++) {
+                        console.log(ArrayObject[i]["sendserver"]);
+                        var check = 0;
+                        if (ArrayObject[i].sendserver === false) { //look for match with sendserver
+
+                            $.ajax({
+                                async  : false,
+                                data   : {
+                                    lat : ArrayObject[i].lan,
+                                    lon : ArrayObject[i].lon,
+                                    name: ArrayObject[i].name
+                                },
+                                error  : function (data, textStatus, jqXHR) {
+
+                                    alert("Couldnot updated!");
+                                },
+                                method : 'post',
+                                success: function (data, textStatus, jqXHR) {
+                                    //console.log(ArrayObject[i]["sendserver"]);
+                                    //updatelocalstorage(i);
+                                    //console.log(check);
+                                    //ArrayObject[i]["sendserver"]=false;
+                                    ArrayObject[i].sendserver = true;
+                                    alert("Data updated successfullyy!!!");
+                                },
+                                url    : "http://ct100020vir6.pc.lut.fi:1072/profile"
+                            });
+
+                            //break;  //exit loop since you found the person
+                        }
+
+                        console.log(ArrayObject[i].sendserver);
+                    }
+                    localStorage.setItem("demo_locations", JSON.stringify(ArrayObject));
+
+                }
+
+            };
+            window.onload = loadMap;
+        </script>
+    </head>
+    <body>
+        <div data-role="page" id="map-page">
+            <div data-role="header" data-theme="a">
+                <h1>
+                    Maps 
+                </h1>
+            </div>
+            <div class="ui-content" data-ajax="false" id="map-canvas" role="main">
+                <!-- map loads here... -->
+            </div>
+            <!-- pop upss... -->
+            <div data-role="popup" id="myPopupDiv1">
+                <p>
+                    First Location
+                    <p></div>
+                    <div data-role="popup" id="myPopupDiv">
+                        <p>
+                            There is no signal!!!
+                            <p></div>
+                            <div data-role="popup" id="myPopupDiv2">
+                                <p>
+                                    New Posititon found
+                                    <p></div>
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <b>
+                                                    Position 
+                                                </b>
+                                            </td>
+                                            <td id="position_cell">
+                                                &nbsp; 
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <b>
+                                                    Score 
+                                                </b>
+                                            </td>
+                                            <td id="score_cell">
+                                                &nbsp; 
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <b>
+                                                    Collected Balls
+                                                </b>
+                                            </td>
+                                            <td id="ball_cell">
+                                                &nbsp; 
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <b>
+                                                    Position Accuracy
+                                                </b>
+                                            </td>
+                                            <td id="counter">
+                                                1:00 
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <b>
+                                                    Altitude Accuracy
+                                                </b>
+                                            </td>
+                                            <td id="altitude">
+                                                - 
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <div data-role="footer" data-theme="c">
+                                        <h1>
+                                            Maps 
+                                        </h1>
+                                    </div>
+                                </div>
+                                <!--Modal for Game over -->
+                                <div aria-hidden="true" aria-labelledby="gridSystemModalLabel" class="modal fade"
+                                    id="myModalNorm"role="dialog">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                                                    <span aria-hidden="true">
+                                                        &times; 
+                                                    </span>
+                                                </button>
+                                                <h4 class="modal-title" id="gridSystemModalLabel">
+                                                    Modal title
+                                                </h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            .col-md-4 
+                                                        </div>
+                                                        <div class="col-md-4 col-md-offset-4">
+                                                            .col-md-4 .col-md-offset-4
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-3 col-md-offset-3">
+                                                            .col-md-3 .col-md-offset-3
+                                                        </div>
+                                                        <div class="col-md-2 col-md-offset-4">
+                                                            .col-md-2 .col-md-offset-4
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6 col-md-offset-3">
+                                                            .col-md-6 .col-md-offset-3
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-9">
+                                                            Level 1: .col-sm-9
+                                                            <div class="row">
+                                                                <div class="col-xs-8 col-sm-6">
+                                                                    Level 2: .col-xs-8 .col-sm-6
+                                                                </div>
+                                                                <div class="col-xs-4 col-sm-6">
+                                                                    Level 2: .col-xs-4 .col-sm-6
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-default" data-dismiss="modal" type="button">
+                                                    Close 
+                                                </button>
+                                                <button class="btn btn-primary" type="button">
+                                                    Save changes
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- /.modal-content -->
+                                    </div>
+                                    <!-- /.modal-dialog -->
+                                </div>
+                                <!-- /.modal -->
+                            </body>
+                        </html>

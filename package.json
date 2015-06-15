@@ -1,0 +1,27 @@
+{
+  "name": "node-passport-ivb",
+  "description": "demo of passport",
+  "version": "0.0.3",
+  "dependencies": {
+    "express": "4.x.x",
+    "passport": "*",
+    "connect-flash": "*",
+    "mongoose": "*",
+    "ejs": "*",
+    "passport-local": "*",
+    "body-parser": "*",
+    "morgan": "~1.0.0",
+    "debug": "~0.7.4",
+    "express-logger": "*",
+    "cookie-parser": "*",
+    "express-session": "*",
+    "sql-injection": "*"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "server.js",
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
+}
