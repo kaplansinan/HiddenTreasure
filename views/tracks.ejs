@@ -1,0 +1,233 @@
+<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+        <meta charset="utf-8">
+        <meta content="Bootply" name="generator"/>
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1"
+            name="viewport">
+        <link
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+        <script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+        <script type='text/javascript' src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <!--[if lt IE 9]>
+        <script src="//html5shim.googlecode.com/svn/trunk/html5.js">
+        </script>
+        <![endif]-->
+        <link href="/bootstrap/img/favicon.ico" rel="shortcut icon">
+        <link href="/bootstrap/img/apple-touch-icon.png" rel="apple-touch-icon">
+        <link href="/bootstrap/img/apple-touch-icon-72x72.png" rel="apple-touch-icon"
+            sizes="72x72">
+        <link href="/bootstrap/img/apple-touch-icon-114x114.png" rel="apple-touch-icon"
+            sizes="114x114">
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:600' rel='stylesheet'
+            type='text/css'>
+        <style>
+            #map-canvas {
+                height  : 100%;
+                left    : 0;
+                position: absolute;
+                top     : 0;
+                width   : 100%;
+                z-index : 0;
+            }
+            body {
+                -moz-background-size   : cover;
+                -o-background-size     : cover;
+                -webkit-background-size: cover;
+                background-size        : cover;
+                font-family            : 'Open Sans', sans-serif;
+            }
+
+            .btngroup {
+                margin-top: 70px;
+                opacity   : 0.9;
+            }
+
+            .panel-transparent {
+                background: none;
+            }
+
+            .panel-transparent .panel-heading {
+                background: rgba(122, 130, 136, 0.2)!important;
+            }
+
+            .panel-transparent .panel-body {
+                background: rgba(46, 51, 56, 0.2)!important;
+            }
+
+            .panel-transparent .panel-footer {
+                background: rgba(46, 51, 56, 0.2)!important;
+            }
+            .form-group.last {
+                margin-bottom: 0;
+            }
+            .footer {
+                background: #000;
+                border-top: 1px solid #00f0ff;
+                bottom    : 0;
+                clear     : both;
+                height    : 30px;
+                left      : 0;
+                margin-top: -30px;
+                padding   : 5px 0;
+                position  : fixed;
+                width     : 100%;
+            }
+        </style>
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+        <title>
+            Welcome to Game
+        </title>
+        <script>
+            var map;
+            function initialize() {
+                var mapOptions = {
+                    center: new google.maps.LatLng(-34.397, 150.644),
+                    zoom  : 6
+                };
+                map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+                var latLng = new google.maps.LatLng(61.065860, 28.094533);
+                //Makes a latlng
+                map.panTo(latLng);
+
+                //Make map global
+            }
+
+            google.maps.event.addDomListener(window, 'load', initialize);
+        </script>
+    </head>
+    <body>
+        <!--map canvas-->
+        <div id="map-canvas"></div>
+        <!--main page layout-->
+        <div class="page-wrap">
+            <!--page container-->
+            <div class="container">
+                <!--Main Panel-->
+                <div class="row">
+                    <div
+                        class="col-md-4 col-xs-offset-2 col-sm-offset-2 col-md-offset-6 col-lg-offset-6">
+                        <div class="btngroup">
+                            <div class="btn-group-vertical">
+                                <button class="btn btn-block btn-success btn-lg " data-target="#create_track"
+                                    data-toggle="modal" type="button">
+                                    <span class="glyphicon glyphicon-pushpin"></span>
+                                    Create Your Track
+                                </button>
+                                <br>
+                                    <button class="btn btn-block btn-success btn-lg " data-target="#choose_track"
+                                        data-toggle="modal" type="button">
+                                        <span class="glyphicon glyphicon-list"></span>
+                                        Choose Track
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!--end of row-->
+                    <!--Modal for Choose Track-->
+                    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade "
+                        id="choose_track" role="dialog" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <!-- Modal Header -->
+                                <div class="modal-header">
+                                    <button class="close" data-dismiss="modal" type="button">
+                                        <span aria-hidden="true">
+                                            &times; 
+                                        </span>
+                                        <span class="sr-only">
+                                            Close 
+                                        </span>
+                                    </button>
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        Choose Track
+                                    </h4>
+                                </div>
+                                <!-- Modal Body -->
+                                <div class="modal-body">
+                                    <form class="form-horizontal">
+                                        <fieldset>
+                                            <!-- Select Basic -->
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label" for="status">Tracks</label>
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" id="status" name="status">
+                                                        <option>Track#1</option>
+                                                        <option>Track#2</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                                <!-- Modal Footer -->
+                                <div class="modal-footer">
+                                    <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+                                    <a class="btn btn-primary" href="demo">
+                                        Start 
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end of Modal for Choose Track ->
+                    
+                            <!--Modal for Creatin your own track-->
+                    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade "
+                        id="create_track" role="dialog" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <!-- Modal Header -->
+                                <div class="modal-header">
+                                    <button class="close" data-dismiss="modal" type="button">
+                                        <span aria-hidden="true">
+                                            &times; 
+                                        </span>
+                                        <span class="sr-only">
+                                            Close 
+                                        </span>
+                                    </button>
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        Create Track
+                                    </h4>
+                                </div>
+                                <!-- Modal Body -->
+                                <div class="modal-body">
+                                    <form class="form-horizontal">
+                                        <fieldset>
+                                            <!-- Text input-->
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label" for="inputEmail3">
+                                                    Track Name</label>
+                                                <div class="col-sm-9">
+                                                    <input class="form-control" id="inputEmail3" placeholder="Enter Track Name"
+                                                        required="" type="text">
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                                <!-- Modal Footer -->
+                                <div class="modal-footer">
+                                    <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+                                    <a class="btn btn-primary" href="track">
+                                        Start 
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Modal for Creatin your own track-->
+                </div><!--end of container-->
+            </div><!--end of page layout-->
+            <!--Page footer-->
+            <div class="footer">
+                <a href="#">
+                    Game Team
+                </a>
+                (c) 2015. Terms and Conditions.
+            </div>
+        </body>
+        <script></script>
+    </html>

@@ -1,0 +1,347 @@
+<html>
+    <head>
+        <title>
+            GeoHash 
+        </title>
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            #map-canvas {
+                height  : 100%;
+                left    : 0;
+                position: absolute;
+                top     : 0;
+                width   : 100%;
+                z-index : 0;
+            }
+
+            .btngroup {
+                margin-top: 70px;
+                opacity   : 0.9;
+            }
+        </style>
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <script type="text/javascript">
+            var loadMap = function () {
+
+                var myOptions = {
+                    center   : new google.maps.LatLng(61.06501, 28.09751),
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    zoom     : 15
+                };
+                var map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
+
+                var infowindow = new google.maps.InfoWindow();
+
+                var track_locations = [];
+                var marker;
+                var uniqueId = 1;
+
+                //check local storage if there is previous track available or not
+                if (localStorage.getItem("loc_store_tracks") !== null) {
+                    alert("welcome back  to your track");
+                    //get the values from previous session
+                    track_locations = JSON.parse(localStorage.getItem("loc_store_tracks"));
+
+                    for (i = 0; i < track_locations.length; i++) {
+
+                        var pos = new google.maps.LatLng(track_locations[i].lan, track_locations[i].lon);
+                        marker    = new google.maps.Marker({
+                            icon    : '/images/Treasure-icon.png',
+                            map     : map,
+                            position: pos
+                        });
+
+                        marker.id = track_locations[i].id;
+                        //Content structure of info Window for the Markers
+                        var contentString = $('<div class="marker-info-win">' +
+                        '<div class="marker-inner-win"><span class="info-content">' +
+                        '<h5 class="marker-heading">New Marker</h5>' +
+                        'You are here!!' +
+                        '</span>' +
+                        '<br/><button name="remove-marker" class="btn btn-xs btn-info remove-marker" title="Remove Marker">Remove Marker</button></div></div>');
+
+                        //Create an infoWindow
+                        var infowindow = new google.maps.InfoWindow();
+
+                        //set the content of infoWindow
+                        infowindow.setContent(contentString[0]);
+
+                        //add click listner to marker which will open infoWindow         
+                        google.maps.event.addListener(marker, 'click', function () {
+                            infowindow.open(map, marker); // click on marker opens info window
+                        });
+
+                        //###### remove marker #########/
+                        var removeBtn = contentString.find('button.remove-marker')[0];
+                        google.maps.event.addDomListener(removeBtn, "click", function (event) {
+
+                            //Remove the marker from Map                  
+                            marker.setMap(null);
+                            for (var j = 0; j < track_locations.length; j++) {
+                                if (track_locations[j].id == marker.id) {
+                                    //Remove the marker from Map                  
+                                    //marker.setMap(null);
+
+                                    //Remove the marker from array.
+                                    track_locations.splice(j, 1);
+                                    localStorage.removeItem("loc_store_tracks");
+                                    localStorage.setItem("loc_store_tracks", JSON.stringify(track_locations));
+                                    return;
+                                }
+                            }
+
+                        });
+
+                    }
+
+                } //end if statement for checking localstogare
+                // I add a marker to the map using the given latitude
+                // and longitude location.
+                function addMarker(latitude, longitude, label) {
+                    // Create the marker - this will automatically place it
+                    // on the existing Google map (that we pass-in).
+                    var marker = new google.maps.Marker({
+                        map     : map,
+                        position: new google.maps.LatLng(latitude, longitude),
+                        title   : (label || "")
+                    });
+                    // Return the new marker reference.
+                    return (marker);
+                }
+
+                // I update the marker's position and label.
+                function updateMarker(marker, latitude, longitude, label) {
+                    // Update the position.
+                    marker.setPosition(new google.maps.LatLng(latitude, longitude));
+
+                    google.maps.event.addListener(marker, 'click', function () {
+                        //map.setZoom();
+                        alert(marker.getPosition());
+                        //$("#popupDialog").popup("open")
+                    });
+
+                    // Update the title if it was provided.
+                    if (label) {
+                        marker.setTitle(label);
+                    }
+                }
+
+                ///positionCell.firstChild.nodeValue = panorama.getPosition() + '';
+
+                // Check to see if this browser supports geolocation.
+                if (navigator.geolocation) {
+
+                    // This is the location marker that we will be using
+                    // on the map. Let's store a reference to it here so
+                    // that it can be updated in several places.
+                    var locationMarker = null;
+
+                    // Get the location of the user's browser using the
+                    // native geolocation service. When we invoke this method
+                    // only the first callback is requied. The second
+                    // callback - the error handler - and the third
+                    // argument - our configuration options - are optional.
+                    navigator.geolocation.getCurrentPosition(function (position) {
+
+                        alert("GPS Signal available ");
+                        // Check to see if there is already a location.
+                        // There is a bug in FireFox where this gets
+                        // invoked more than once with a cahced result.
+                        //alert((position.coords.speed))                  
+                        if (locationMarker) {
+                            return;
+                        }
+                        var p = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        //update map center
+                        map.setCenter(p);
+
+                        // Log that this is the initial position.
+                        console.log("Initial Position Found");
+                        //$( "#myPopupDiv" ).popup( "open" );
+
+                        // Add a marker to the map using the position.
+                        locationMarker = addMarker(position.coords.latitude, position.coords.longitude, "Initial Position");
+
+                    }, function (error) {
+                        //alert("heyyyy make gps on");
+
+                        alert("GPS Signal not available ");
+                        //alert(" lost gps connection");
+                    }, {
+                        enableHighAccuracy: true,
+                        maximumAge        : (1000 * 60 * 15),
+                        timeout           : (5 * 1000)
+                    });
+
+                    var positionTimer = navigator.geolocation.watchPosition(function (position) {
+
+                        // Log that a newer, perhaps more accurate
+                        // position has been found.
+
+                        console.log("Newer Position Found");
+
+                        // Set the new position of the existing marker.
+                        updateMarker(locationMarker, position.coords.latitude, position.coords.longitude, "Updated / Accurate Position");
+
+                        var p1;
+                        p1 = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        //update map center
+                        map.setCenter(p1);
+
+                    }, function (error) {
+
+                        alert("GPSSSSS Problemmmmm:");
+
+                    }, {
+                        enableHighAccuracy: true,
+                        maximumAge        : 1000 * 6,
+                        timeout           : 4 * 1000
+                    } // end of if statement
+                    );
+
+                } else {
+                    alert("GPS is not supported!!");
+                }
+
+                //get location and pur marker on the map 
+                function getLocation() {
+
+                    console.log("event fired");
+                    //if geolocation is supported perform the tasks
+                    if (navigator.geolocation) {
+                        // timeout at 60000 milliseconds (60 seconds)
+                        var locMarker = null;
+                        console.log("event fired 2");
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            console.log("Initial Position Found");
+                            //call addTreasureMarker function to put markers on the map
+                            locMarker = addTreasureMarker(position.coords.latitude, position.coords.longitude);
+                            //create point to put in array
+                            var point = {
+                                id : locMarker.id,
+                                lan: position.coords.latitude,
+                                lon: position.coords.longitude
+                            };
+                            //push the current location to track_locations array
+                            track_locations.push(point);
+                            //print the date
+                            console.log(track_locations);
+                            //put position to localstorage
+                            localStorage.setItem("loc_store_tracks", JSON.stringify(track_locations));
+
+                        },
+                        //print if any error occurs
+                        function (error) {
+                            alert("GPS Signal not available ");
+                        },
+                        //settings
+                        {
+                            timeout           : (5 * 1000),
+                            maximumAge        : (1000 * 60 * 15),
+                            enableHighAccuracy: true
+                        }
+                        //if geolocation is not supported
+                        );
+                    } else {
+                        alert("Sorry, browser does not support geolocation!");
+                    }
+                }
+
+                //add treasure marker on the map for tracking
+                function addTreasureMarker(latitude, longitude) {
+                    // Create the marker - this will automatically place it
+                    // on the existing Google map (that we pass-in).
+                    var marker = new google.maps.Marker({
+                        icon    : '/images/Treasure-icon.png',
+                        map     : map,
+                        position: new google.maps.LatLng(latitude, longitude)
+                    });
+
+                    //set unique id s for each marker
+
+                    marker.id = uniqueId;
+                    uniqueId++;
+
+                    //Content structure of info Window for the Markers
+                    var contentString = $('<div class="marker-info-win">' +
+                    '<div class="marker-inner-win"><span class="info-content">' +
+                    '<h5 class="marker-heading">New Marker</h5>' +
+                    'You are here!!' +
+                    '</span>' +
+                    '<br/><button name="remove-marker" class="btn btn-xs btn-info remove-marker" title="Remove Marker">Remove Marker</button></div></div>');
+
+                    //Create an infoWindow
+                    var infowindow = new google.maps.InfoWindow();
+
+                    //set the content of infoWindow
+                    infowindow.setContent(contentString[0]);
+
+                    //add click listner to marker which will open infoWindow         
+                    google.maps.event.addListener(marker, 'click', function () {
+                        infowindow.open(map, marker); // click on marker opens info window
+                    });
+
+                    //###### remove marker #########/
+                    var removeBtn = contentString.find('button.remove-marker')[0];
+                    google.maps.event.addDomListener(removeBtn, "click", function (event) {
+                        for (var i = 0; i < track_locations.length; i++) {
+                            if (track_locations[i].id == marker.id) {
+                                //Remove the marker from Map                  
+                                marker.setMap(null);
+
+                                //Remove the marker from array.
+                                track_locations.splice(i, 1);
+                                localStorage.removeItem("loc_store_tracks");
+                                localStorage.setItem("loc_store_tracks", JSON.stringify(track_locations));
+                                return;
+                            }
+                        }
+                    });
+                    // Return the new marker reference.
+                    return (marker);
+                }
+
+                // button click listeners
+                $('#add_track').click(function () {
+                    getLocation();
+                });
+
+                $('#delete_marker').click(function () {
+                    getLocation();
+                });
+
+            };
+
+            google.maps.event.addDomListener(window, 'load', loadMap);
+        </script>
+    </head>
+    <body>
+        <div class="ui-content" data-ajax="false" id="map-canvas" role="main">
+            <!-- map loads here... -->
+        </div>
+        <div class="row">
+            <div
+                class="col-md-4 col-xs-offset-2 col-sm-offset-2 col-md-offset-6 col-lg-offset-6">
+                <div class="btngroup">
+                    <div class="control-group">
+                        <div class="controls">
+                            <button class="btn btn btn-info " id="add_track" name="add_track">
+                                <span class="glyphicon glyphicon-registration-mark"></span>
+                                Add to Track</button>
+                            <button class="btn btn-success " id="complete_track" name="complete_track">
+                                <span class="glyphicon glyphicon-flag"></span>
+                                <a href="profile">
+                                    Complete Track
+                                </a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
