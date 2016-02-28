@@ -1,5 +1,5 @@
 # HiddenTreasure
-Building location based game for mobile browser
+Building location based game for mobile browser.
 For more information please check "Instructions.pdf" file. 
 ## Instructions
 If you would like to download the code and try it for yourself:
