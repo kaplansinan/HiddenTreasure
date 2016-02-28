@@ -1,5 +1,6 @@
 # HiddenTreasure
 Building location based game for mobile browser
+For more information please check "Instructions.pdf" file. 
 ## Instructions
 If you would like to download the code and try it for yourself:
   1. Clone the repo: https://github.com/kaplansinan/HiddenTreasure.git
