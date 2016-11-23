@@ -10,3 +10,6 @@ If you would like to download the code and try it for yourself:
   5. Change out "app.listen(1072)" to "app.listen(8080)"
   6. Launch: node server.js
   7. Visit in your web browser at: http://localhost:8080
+## Related paper:
+Issues on Developing a Location Aware Game for Mobile Browsers
+http://dl.acm.org/citation.cfm?id=2983509 
